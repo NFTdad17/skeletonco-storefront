@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Suspense } from "react";
 import { CartProvider } from "@/components/cart-provider";
 import "./globals.css";
 
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={sans.variable}>
       <body>
-        <CartProvider>{children}</CartProvider>
+        <Suspense fallback={null}>
+          <CartProvider>{children}</CartProvider>
+        </Suspense>
       </body>
     </html>
   );
