@@ -7,7 +7,8 @@ import type {
   ProductVariant,
   ProductView,
 } from "@/lib/product";
-import { imageForVariant, initialVariant, priceLabel } from "@/lib/variants";
+import { categorizeProduct } from "@/lib/shop-category";
+import { imageForVariant, initialVariant, priceLabel, startingPrice } from "@/lib/variants";
 
 const PRINTIFY_BASE_URL = "https://api.printify.com/v1";
 export const PRINTIFY_SHOP_ID = "27129548";
@@ -199,6 +200,19 @@ function readPage(payload: unknown): { items: unknown[]; hasNext: boolean } {
   return { items, hasNext };
 }
 
+function productTags(value: unknown): string[] {
+  if (!isRecord(value) || !Array.isArray(value.tags)) return [];
+  return value.tags.flatMap((tag) => (typeof tag === "string" ? [plainText(tag)] : []));
+}
+
+function isRemovedFromShop(title: string): boolean {
+  return (
+    /\bheavy fade tees?\b/i.test(title) ||
+    /\bdistressed dad hats?\b/i.test(title) ||
+    /\blogo cotton pocket tees?\b/i.test(title)
+  );
+}
+
 function productIdOf(value: unknown): string | null {
   if (!isRecord(value)) return null;
   if (typeof value.id === "string") return value.id;
@@ -224,15 +238,17 @@ export async function listProducts(): Promise<ProductSummary[]> {
       if (pageIds.length > 0 && pageIds.every((id) => seen.has(id))) break;
 
       for (const item of items) {
-        if (isRecord(item) && item.visible === false) continue;
+        if (isRecord(item) && (item.visible === false || item.is_deleted === true)) continue;
         const product = normalizeProduct(item);
-        if (!product || seen.has(product.id)) continue;
+        if (!product || seen.has(product.id) || isRemovedFromShop(product.title)) continue;
         seen.add(product.id);
         summaries.push({
           id: product.id,
           title: product.title,
           imageSrc: imageForVariant(product, initialVariant(product)?.id ?? null),
           priceLabel: priceLabel(product.variants),
+          price: startingPrice(product.variants),
+          category: categorizeProduct(product.title, productTags(item)),
         });
       }
 
@@ -257,11 +273,11 @@ export const loadProduct = cache(async (id: string): Promise<ProductView> => {
   const payload = await printifyGet(
     `/shops/${PRINTIFY_SHOP_ID}/products/${encodeURIComponent(id)}.json`,
   );
-  if (isRecord(payload) && payload.visible === false) {
+  if (isRecord(payload) && (payload.visible === false || payload.is_deleted === true)) {
     throw new PrintifyError("Not found", 404);
   }
   const product = normalizeProduct(payload);
-  if (!product) {
+  if (!product || isRemovedFromShop(product.title)) {
     throw new PrintifyError("Not found", 404);
   }
   return product;

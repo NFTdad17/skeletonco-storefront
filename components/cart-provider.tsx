@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import checkoutLabel from "@/art/checkoututton.webp";
 import { SkellyModel } from "@/components/skelly-model";
 import logo from "@/art/Logo.webp";
@@ -105,8 +104,6 @@ export function useCart(): CartContextValue {
 }
 
 function RouteSkelly() {
-  const pathname = usePathname();
-  if (pathname !== "/" && pathname !== "/exclusive-drops" && pathname !== "/about") return null;
   return <SkellyModel />;
 }
 

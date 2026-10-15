@@ -34,9 +34,13 @@ export type ProductView = {
   variants: ProductVariant[];
 };
 
+export type ProductCategory = "tees" | "long-sleeves" | "jackets" | "headwear" | "miscellaneous";
+
 export type ProductSummary = {
   id: string;
   title: string;
   imageSrc: string | null;
   priceLabel: string | null;
+  price: number | null;
+  category: ProductCategory | null;
 };

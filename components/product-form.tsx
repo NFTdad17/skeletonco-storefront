@@ -11,6 +11,7 @@ import {
   variantMatching,
 } from "@/lib/variants";
 import { useCart } from "@/components/cart-provider";
+import { HoverZoom } from "@/components/hover-zoom";
 
 export function ProductForm({ product }: { product: ProductView }) {
   const { addItem, openCart } = useCart();
@@ -58,9 +59,7 @@ export function ProductForm({ product }: { product: ProductView }) {
   return (
     <div className="product-layout">
       {imageSrc ? (
-        // Printify returns image URLs from more than one host.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageSrc} alt={product.title} className="hero" />
+        <HoverZoom src={imageSrc} alt={product.title} className="hero" />
       ) : (
         <div className="hero hero-empty" role="img" aria-label={`${product.title}, no image yet`} />
       )}

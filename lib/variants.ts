@@ -46,10 +46,16 @@ export function imageForVariant(
   return fallback?.src ?? null;
 }
 
-export function priceLabel(variants: ProductVariant[]): string | null {
+export function startingPrice(variants: ProductVariant[]): number | null {
   const prices = variants.filter((variant) => variant.enabled).map((variant) => variant.price);
   if (prices.length === 0) return null;
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
+  return Math.min(...prices);
+}
+
+export function priceLabel(variants: ProductVariant[]): string | null {
+  const min = startingPrice(variants);
+  if (min == null) return null;
+  const enabled = variants.filter((variant) => variant.enabled);
+  const max = Math.max(...enabled.map((variant) => variant.price));
   return min === max ? formatDollars(min) : `From ${formatDollars(min)}`;
 }
