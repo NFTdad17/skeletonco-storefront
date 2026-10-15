@@ -3,10 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import checkoutLabel from "@/art/checkoututton.webp";
+import { SkellyModel } from "@/components/skelly-model";
 import logo from "@/art/Logo.webp";
-import skelly from "@/art/Skelly.webp";
+import skellyCheckout from "@/art/skellycheckout.webp";
 import {
   createContext,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -101,6 +104,29 @@ export function useCart(): CartContextValue {
   return value;
 }
 
+function RouteSkelly() {
+  const pathname = usePathname();
+  if (pathname !== "/" && pathname !== "/exclusive-drops" && pathname !== "/about") return null;
+  return <SkellyModel />;
+}
+
+function HeaderCart({ count, openCart }: { count: number; openCart: () => void }) {
+  return (
+    <div className="header-mascot">
+      <Image src={skellyCheckout} alt="" sizes="(max-width: 48rem) 16vw, 10rem" className="header-mascot-image" />
+      <button
+        type="button"
+        className="cart-button"
+        onClick={openCart}
+        aria-label={`Checkout, ${count} items`}
+      >
+        <Image src={checkoutLabel} alt="" sizes="(max-width: 48rem) 12vw, 8rem" className="checkout-label" />
+        {count > 0 ? <span className="count">{count}</span> : null}
+      </button>
+    </div>
+  );
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const lines = useSyncExternalStore(subscribeCart, getCartSnapshot, getServerCartSnapshot);
   const [open, setOpen] = useState(false);
@@ -158,7 +184,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setOpen(true);
   }, []);
 
-  const pathname = usePathname();
   const count = useMemo(
     () => lines.reduce((total, line) => total + line.quantity, 0),
     [lines],
@@ -190,26 +215,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
               src={logo}
               alt=""
               preload
-              sizes="(max-width: 40rem) 68vw, 32rem"
+              sizes="(max-width: 48rem) 46vw, 28rem"
               className="brand-logo-image"
             />
           </span>
         </Link>
+        <nav className="header-tabs" aria-label="Shop">
+          <Link className="header-tab" href="/exclusive-drops">
+            Exclusive Drops
+          </Link>
+          <Link className="header-tab" href="/about">
+            About Us
+          </Link>
+        </nav>
         <div className="header-tools">
-          {pathname === "/" ? (
-            <Image src={skelly} alt="" sizes="7.25rem" className="header-mascot" />
-          ) : null}
-          <button
-            type="button"
-            className="cart-button"
-            onClick={openCart}
-            aria-label={`Cart, ${count} items`}
-          >
-            Cart
-            {count > 0 ? <span className="count">{count}</span> : null}
-          </button>
+          <Suspense fallback={null}>
+            <HeaderCart count={count} openCart={openCart} />
+          </Suspense>
         </div>
       </header>
+      <Suspense fallback={null}>
+        <RouteSkelly />
+      </Suspense>
       {children}
       <dialog
         ref={dialogRef}

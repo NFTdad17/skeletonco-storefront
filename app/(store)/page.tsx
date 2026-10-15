@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { ProductCard } from "@/components/product-card";
-import { SkellyModel } from "@/components/skelly-model";
 import { listProducts } from "@/lib/printify";
 
 export const metadata: Metadata = {
@@ -12,14 +11,11 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>
-      <main id="content" className="shop">
-        <Suspense fallback={<p className="status">Loading the shop…</p>}>
-          <Catalog />
-        </Suspense>
-      </main>
-      <SkellyModel />
-    </>
+    <main id="content" className="shop">
+      <Suspense fallback={<p className="status">Loading the shop…</p>}>
+        <Catalog />
+      </Suspense>
+    </main>
   );
 }
 
