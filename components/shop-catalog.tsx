@@ -4,13 +4,22 @@ import { useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import type { ProductCategory, ProductSummary } from "@/lib/product";
 
-const TABS: { id: "all" | ProductCategory; label: string }[] = [
+const TABS: { id: "popular" | "all" | ProductCategory; label: string }[] = [
   { id: "all", label: "All" },
+  { id: "popular", label: "Popular" },
   { id: "tees", label: "Tees" },
   { id: "long-sleeves", label: "Long Sleeves" },
   { id: "jackets", label: "Jackets" },
   { id: "headwear", label: "Headwear" },
   { id: "miscellaneous", label: "Miscellaneous" },
+];
+
+const POPULAR_PINS = [
+  /\bheavy blend hoodies?\b/i,
+  /\bthree panel fleece hoodies?\b/i,
+  /\bpom pom beanies?\b/i,
+  /\bleather patch caps?\b/i,
+  /\bcrew\s?necks?\b/i,
 ];
 
 type PriceSort = "low-high" | "high-low";
@@ -22,13 +31,30 @@ function comparePrice(left: number | null, right: number | null, sort: PriceSort
   return sort === "low-high" ? left - right : right - left;
 }
 
+function popularOrder(products: ProductSummary[]) {
+  const pinned: { product: ProductSummary; rank: number }[] = [];
+  const rest: ProductSummary[] = [];
+  for (const product of products) {
+    const rank = POPULAR_PINS.findIndex((pattern) => pattern.test(product.title));
+    if (rank === -1) rest.push(product);
+    else pinned.push({ product, rank });
+  }
+  pinned.sort((left, right) => left.rank - right.rank);
+  return [...pinned.map((entry) => entry.product), ...rest];
+}
+
 export function ShopCatalog({ products }: { products: ProductSummary[] }) {
-  const [category, setCategory] = useState<(typeof TABS)[number]["id"]>("all");
+  const [category, setCategory] = useState<(typeof TABS)[number]["id"]>("popular");
   const [sort, setSort] = useState<PriceSort>("low-high");
   const filtered =
-    category === "all" ? products : products.filter((product) => product.category === category);
-  const visible = [...filtered].sort((left, right) => comparePrice(left.price, right.price, sort));
-  const selected = TABS.find((tab) => tab.id === category) ?? TABS[0];
+    category === "all" || category === "popular"
+      ? products
+      : products.filter((product) => product.category === category);
+  const visible =
+    category === "popular"
+      ? popularOrder(filtered)
+      : [...filtered].sort((left, right) => comparePrice(left.price, right.price, sort));
+  const selected = TABS.find((tab) => tab.id === category) ?? TABS[1];
 
   return (
     <>
@@ -58,7 +84,7 @@ export function ShopCatalog({ products }: { products: ProductSummary[] }) {
         </label>
       </div>
       {visible.length === 0 ? (
-        category === "all" ? (
+        category === "all" || category === "popular" ? (
           <div className="empty">
             <h2>Nothing is listed right now</h2>
             <p className="muted">
