@@ -86,15 +86,38 @@ select {
 }
 
 .brand {
+  position: relative;
   min-width: 0;
   text-decoration: none;
+}
+
+.brand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 50%),
+    0 0 12px 3px rgb(0 0 0 / 55%),
+    0 0 28px 8px rgb(0 0 0 / 32%);
+  transition: box-shadow 160ms ease;
+}
+
+.brand:hover::after,
+.brand:focus-visible::after {
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 50%),
+    0 0 12px 3px rgb(0 0 0 / 55%),
+    0 0 28px 8px rgb(0 0 0 / 32%),
+    0 0 22px 6px rgb(0 0 0 / 75%),
+    0 0 56px 18px rgb(0 0 0 / 48%);
 }
 
 .brand-logo {
   position: relative;
   display: block;
   width: min(28rem, 34vw);
-  aspect-ratio: 608 / 202;
+  aspect-ratio: 604 / 198;
   overflow: hidden;
 }
 
@@ -121,11 +144,11 @@ select {
 
 .brand-logo-image {
   position: absolute;
-  width: calc(640 / 608 * 100%);
-  height: calc(640 / 202 * 100%);
+  width: calc(640 / 604 * 100%);
+  height: calc(640 / 198 * 100%);
   max-width: none;
-  left: calc(-16 / 608 * 100%);
-  top: calc(-211 / 202 * 100%);
+  left: calc(-18 / 604 * 100%);
+  top: calc(-213 / 198 * 100%);
 }
 
 .header-tools {
@@ -138,7 +161,7 @@ select {
 
 .header-mascot {
   position: relative;
-  width: calc(min(28rem, 34vw) * 202 / 608);
+  width: calc(min(28rem, 34vw) * 198 / 604);
   background-color: rgb(196 196 196 / 70%);
   background-image:
     linear-gradient(rgb(196 196 196 / 70%), rgb(196 196 196 / 70%)),
@@ -675,11 +698,31 @@ select {
 }
 
 .checkout {
-  width: min(100% - 2rem, 40rem);
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: min(100% - 2rem, 46rem);
   margin: 0 auto;
   padding: 1.5rem 0 3rem;
   display: grid;
   gap: 1.25rem;
+  background: transparent;
+}
+
+.checkout::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: rgb(196 196 196 / 78%);
+}
+
+.checkout-fields {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.75rem 1.5rem;
 }
 
 .checkout h1 {
@@ -763,7 +806,7 @@ select {
   }
 
   .header-mascot {
-    width: calc(min(14rem, 46vw) * 202 / 608);
+    width: calc(min(14rem, 46vw) * 198 / 604);
   }
 }
 
@@ -779,6 +822,10 @@ select {
 
   .address-row {
     grid-template-columns: 1.4fr 0.8fr 0.7fr;
+  }
+
+  .checkout-fields {
+    padding: 2rem 2.25rem;
   }
 }
 

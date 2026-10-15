@@ -90,7 +90,7 @@ export function CheckoutForm() {
         <span>Subtotal</span>
         <span>{formatDollars(subtotal)}</span>
       </p>
-      <form className="product-form" onSubmit={submit}>
+      <form className="product-form checkout-fields" onSubmit={submit}>
         <h2>Shipping address</h2>
         <label className="field">
           Name
