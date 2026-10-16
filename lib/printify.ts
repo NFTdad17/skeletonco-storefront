@@ -208,7 +208,6 @@ function productTags(value: unknown): string[] {
 function isRemovedFromShop(title: string): boolean {
   const singleSticker = /\bstickers?\b/i.test(title) && !/\b3[\s-]?packs?\b/i.test(title);
   return (
-    /\bheavy fade tees?\b/i.test(title) ||
     /\bdistressed dad hats?\b/i.test(title) ||
     /\blogo cotton pocket tees?\b/i.test(title) ||
     /\btattoo flash zip hoodies?\b/i.test(title) ||
