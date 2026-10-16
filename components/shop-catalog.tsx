@@ -8,9 +8,10 @@ const TABS: { id: "popular" | "all" | ProductCategory; label: string }[] = [
   { id: "all", label: "All" },
   { id: "popular", label: "Popular" },
   { id: "tees", label: "Tees" },
-  { id: "long-sleeves", label: "Long Sleeves" },
-  { id: "jackets", label: "Jackets" },
+  { id: "long-sleeves", label: "Long Sleeves and Jackets" },
+  { id: "shorts-pants", label: "Shorts and Pants" },
   { id: "headwear", label: "Headwear" },
+  { id: "rugs", label: "Rugs" },
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
 

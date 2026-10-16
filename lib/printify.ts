@@ -211,6 +211,9 @@ function isRemovedFromShop(title: string): boolean {
     /\bheavy fade tees?\b/i.test(title) ||
     /\bdistressed dad hats?\b/i.test(title) ||
     /\blogo cotton pocket tees?\b/i.test(title) ||
+    /\btattoo flash zip hoodies?\b/i.test(title) ||
+    /\b(?:skelly|scally) throw pillows?\b/i.test(title) ||
+    /\bfall pumpkin family logo doormats?\b/i.test(title) ||
     singleSticker
   );
 }

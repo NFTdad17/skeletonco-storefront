@@ -2,12 +2,12 @@ import type { ProductCategory } from "@/lib/product";
 
 const CATEGORY_RULES: { category: ProductCategory; pattern: RegExp }[] = [
   {
-    category: "jackets",
-    pattern: /\bjackets?\b/i,
+    category: "long-sleeves",
+    pattern: /\b(?:hoodies?|long[\s-]?sleeves?|jackets?|crew\s?necks?)\b/i,
   },
   {
-    category: "long-sleeves",
-    pattern: /\b(?:hoodies?|long[\s-]?sleeves?)\b/i,
+    category: "shorts-pants",
+    pattern: /\b(?:shorts?|pants?|pajama bottoms?)\b/i,
   },
   {
     category: "headwear",
@@ -17,6 +17,10 @@ const CATEGORY_RULES: { category: ProductCategory; pattern: RegExp }[] = [
   {
     category: "tees",
     pattern: /\b(?:pocket[\s-]?tees?|t[\s-]?shirts?|tees?)\b/i,
+  },
+  {
+    category: "rugs",
+    pattern: /\b(?:rugs?|doormats?)\b/i,
   },
   {
     category: "miscellaneous",

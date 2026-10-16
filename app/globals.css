@@ -775,13 +775,84 @@ select {
   width: 7.5rem;
   height: 10rem;
   z-index: 4;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
+.skelly-canvas,
 .skelly-model canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
+}
+
+.skelly-bubble {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: calc(100% - 0.85rem);
+  width: max-content;
+  max-width: min(15.5rem, calc(100vw - 1.2rem));
+  padding: 0.7rem 0.85rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 18%);
+  transform-origin: 22% 100%;
+  transform: translateX(-22%) scale(1);
+  animation: skelly-bubble-in 480ms linear forwards;
+}
+
+.skelly-bubble::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  bottom: -0.42rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #fff;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.skelly-bubble-copy {
+  position: relative;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.skelly-bubble-measure {
+  display: block;
+  visibility: hidden;
+}
+
+.skelly-bubble-typed {
+  position: absolute;
+  inset: 0;
+}
+
+@keyframes skelly-bubble-in {
+  0% {
+    transform: translateX(-22%) translateY(10px) scale(0.08);
+  }
+  62% {
+    transform: translateX(-22%) translateY(-6px) scale(1.08);
+  }
+  80% {
+    transform: translateX(-22%) translateY(2px) scale(0.96);
+  }
+  100% {
+    transform: translateX(-22%) translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skelly-bubble {
+    animation: none;
+  }
 }
 
 @media (max-width: 47.99rem) {
