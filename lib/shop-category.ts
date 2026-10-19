@@ -24,7 +24,7 @@ const CATEGORY_RULES: { category: ProductCategory; pattern: RegExp }[] = [
   },
   {
     category: "miscellaneous",
-    pattern: /\b(?:fanny[\s-]?packs?|coffee mugs?|mugs?|cups?|stickers?)\b/i,
+    pattern: /\b(?:fanny[\s-]?packs?|coffee mugs?|mugs?|cups?|stickers?|socks?)\b/i,
   },
 ];
 
