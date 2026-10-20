@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MAX_CART_QUANTITY, clampQuantity } from "@/lib/cart";
 import { formatDollars } from "@/lib/format";
-import type { ProductView } from "@/lib/product";
+import type { ProductImage, ProductView } from "@/lib/product";
+import { extraViewSrcs, modelMockupSrc } from "@/lib/model-mockups";
 import {
   enabledVariants,
-  imageForVariant,
   initialVariant,
+  offeredOptions,
+  productGallery,
   variantMatching,
 } from "@/lib/variants";
 import { useCart } from "@/components/cart-provider";
@@ -20,7 +22,7 @@ export function ProductForm({ product }: { product: ProductView }) {
   const [variantId, setVariantId] = useState<number | null>(starting?.id ?? null);
   const [quantity, setQuantity] = useState(1);
 
-  const optionGroups = product.options.filter((option) => option.values.length > 0);
+  const optionGroups = offeredOptions(product);
   const available = enabledVariants(product);
   const variant = useMemo(() => {
     if (optionGroups.length > 0) {
@@ -29,7 +31,20 @@ export function ProductForm({ product }: { product: ProductView }) {
     return available.find((entry) => entry.id === variantId) ?? null;
   }, [available, optionGroups.length, product, selectedIds, variantId]);
 
-  const imageSrc = imageForVariant(product, variant?.id ?? null);
+  const gallery = useMemo(
+    () =>
+      productGallery(
+        product,
+        variant?.id ?? null,
+        modelMockupSrc(product.id),
+        extraViewSrcs(product.id, variant?.id ?? null),
+      ),
+    [product, variant?.id],
+  );
+  const [pickedSrc, setPickedSrc] = useState<string | null>(null);
+  const imageSrc = gallery.some((image) => image.src === pickedSrc)
+    ? pickedSrc
+    : (gallery[0]?.src ?? null);
   const canAdd = variant != null && variant.enabled;
 
   function choose(valueId: number) {
@@ -39,7 +54,10 @@ export function ProductForm({ product }: { product: ProductView }) {
       const rightOverlap = right.optionIds.filter((id) => selectedIds.includes(id)).length;
       return rightOverlap - leftOverlap;
     })[0];
-    if (best) setSelectedIds(best.optionIds);
+    if (best) {
+      setSelectedIds(best.optionIds);
+      setPickedSrc(null);
+    }
   }
 
   function addToCart() {
@@ -50,7 +68,7 @@ export function ProductForm({ product }: { product: ProductView }) {
       title: product.title,
       variantTitle: variant.title,
       unitAmount: variant.price,
-      imageSrc: imageForVariant(product, variant.id),
+      imageSrc,
       quantity: clampQuantity(quantity),
     });
     openCart();
@@ -58,11 +76,21 @@ export function ProductForm({ product }: { product: ProductView }) {
 
   return (
     <div className="product-layout">
-      {imageSrc ? (
-        <HoverZoom src={imageSrc} alt={product.title} className="hero" />
-      ) : (
-        <div className="hero hero-empty" role="img" aria-label={`${product.title}, no image yet`} />
-      )}
+      <div className="hero-stage">
+        {imageSrc ? (
+          <HoverZoom key={imageSrc} src={imageSrc} alt={product.title} className="hero" />
+        ) : (
+          <div className="hero hero-empty" role="img" aria-label={`${product.title}, no image yet`} />
+        )}
+        {gallery.length > 0 && imageSrc ? (
+          <MockupCarousel
+            images={gallery}
+            title={product.title}
+            selected={imageSrc}
+            onSelect={setPickedSrc}
+          />
+        ) : null}
+      </div>
       <div className="product-copy">
         <h1>{product.title}</h1>
         <p className="price">{variant ? formatDollars(variant.price) : "Unavailable"}</p>
@@ -110,7 +138,10 @@ export function ProductForm({ product }: { product: ProductView }) {
               Variant
               <select
                 value={variant?.id ?? ""}
-                onChange={(event) => setVariantId(Number(event.target.value))}
+                onChange={(event) => {
+                  setVariantId(Number(event.target.value));
+                  setPickedSrc(null);
+                }}
               >
                 {available.map((entry) => (
                   <option key={entry.id} value={entry.id}>
@@ -139,6 +170,78 @@ export function ProductForm({ product }: { product: ProductView }) {
           </button>
           {!canAdd ? <p className="muted">This piece isn&apos;t available to order right now.</p> : null}
         </form>
+      </div>
+    </div>
+  );
+}
+
+function MockupCarousel({
+  images,
+  title,
+  selected,
+  onSelect,
+}: {
+  images: ProductImage[];
+  title: string;
+  selected: string;
+  onSelect: (src: string) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const selectedIndex = Math.max(
+    0,
+    images.findIndex((image) => image.src === selected),
+  );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const thumb = track?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!track || !thumb) return;
+    const left = thumb.offsetLeft - (track.clientWidth - thumb.offsetWidth) / 2;
+    track.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [selected, images]);
+
+  function step(direction: -1 | 1) {
+    const next = images[selectedIndex + direction];
+    if (next) onSelect(next.src);
+  }
+
+  return (
+    <div className="mockup-carousel">
+      <button
+        type="button"
+        className="mockup-arrow mockup-arrow-back"
+        aria-label="Previous image"
+        disabled={selectedIndex <= 0}
+        onClick={() => step(-1)}
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        className="mockup-arrow mockup-arrow-forward"
+        aria-label="Next image"
+        disabled={selectedIndex >= images.length - 1}
+        onClick={() => step(1)}
+      >
+        ›
+      </button>
+      <div className="mockup-track" ref={trackRef}>
+        {images.map((image, index) => {
+          const pressed = image.src === selected;
+          return (
+            <button
+              key={`${image.src}-${index}`}
+              type="button"
+              className="mockup-thumb"
+              aria-pressed={pressed}
+              aria-label={`${title} mockup ${index + 1}`}
+              onClick={() => onSelect(image.src)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image.src} alt="" />
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -17,6 +17,8 @@ const TABS: { id: "popular" | "all" | ProductCategory; label: string }[] = [
 
 const POPULAR_PINS = [
   /\bheavy blend hoodies?\b/i,
+  /\bcuff beanies?\b/i,
+  /\bblue snowflake plaid pajama pants?\b/i,
   /\bthree panel fleece hoodies?\b/i,
   /\bpom pom beanies?\b/i,
   /\bleather patch caps?\b/i,

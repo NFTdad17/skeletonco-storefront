@@ -205,6 +205,18 @@ function productTags(value: unknown): string[] {
   return value.tags.flatMap((tag) => (typeof tag === "string" ? [plainText(tag)] : []));
 }
 
+function isFullyPublished(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  if (value.visible === false || value.is_deleted === true || value.is_locked === true) return false;
+  const external = value.external;
+  if (!isRecord(external)) return false;
+  const id = external.id;
+  const hasId =
+    (typeof id === "number" && Number.isFinite(id)) ||
+    (typeof id === "string" && id.trim().length > 0);
+  return hasId && typeof external.handle === "string" && external.handle.trim().length > 0;
+}
+
 function isRemovedFromShop(title: string): boolean {
   const singleSticker = /\bstickers?\b/i.test(title) && !/\b3[\s-]?packs?\b/i.test(title);
   return (
@@ -242,7 +254,7 @@ export async function listProducts(): Promise<ProductSummary[]> {
       if (pageIds.length > 0 && pageIds.every((id) => seen.has(id))) break;
 
       for (const item of items) {
-        if (isRecord(item) && (item.visible === false || item.is_deleted === true)) continue;
+        if (!isFullyPublished(item)) continue;
         const product = normalizeProduct(item);
         if (!product || seen.has(product.id) || isRemovedFromShop(product.title)) continue;
         seen.add(product.id);
@@ -277,7 +289,7 @@ export const loadProduct = cache(async (id: string): Promise<ProductView> => {
   const payload = await printifyGet(
     `/shops/${PRINTIFY_SHOP_ID}/products/${encodeURIComponent(id)}.json`,
   );
-  if (isRecord(payload) && (payload.visible === false || payload.is_deleted === true)) {
+  if (!isFullyPublished(payload)) {
     throw new PrintifyError("Not found", 404);
   }
   const product = normalizeProduct(payload);
